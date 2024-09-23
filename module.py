@@ -11,6 +11,5 @@ class Module:
         self._statements: list[ast.stmt] = module.body
 
     def play(self, scene: OrderedUpdateScene) -> None:
-        global_rect = Rectangle(color=BLACK)
-        global_scope = Scope(global_rect)
-        global_scope.play(scene, self._statements)
+        global_scope = Scope(scene)
+        global_scope.play(self._statements)

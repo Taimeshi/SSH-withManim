@@ -1,7 +1,7 @@
 import ast
 import dataclasses
 from enum import auto, Enum
-from typing import Any, Self, Iterable
+from typing import Self, Iterable
 
 from manim import *
 
@@ -29,37 +29,43 @@ class VariableName:
 
 class Scope:
 
-    def __init__(self, rect: Mobject, name: str = "global", parent: Self = None):
+    def __init__(self, scene: OrderedUpdateScene, name: str = "global", parent: Self = None):
         self.name = name
         self._parent: Scope | None = parent
-        self._scope_rect: Mobject = rect
+        self._scene: OrderedUpdateScene = scene
         self._names: set[VariableName] = set()
         self._vals: list[VariableValue] = set()
+        self._run_space: VMobject = RoundedRectangle(color=RED, corner_radius=0.1, width=10, height=3)
+        self._memory_space: VMobject = RoundedRectangle(color=BLUE, corner_radius=0.1, width=10, height=3)
+        self._children: VMobject = VMobject()
+        self._spaces: VMobject = VGroup(self._run_space, self._memory_space).arrange(DOWN)
+        self._scene.add_updater(lambda: self._spaces.arrange(DOWN), -2)
+        self._scope_rect: VMobject = SurroundingRectangle(self._spaces,
+                                                          color=ORANGE if self.name == "global" else WHITE,
+                                                          corner_radius=0.1)
 
-    def play(self, scene: OrderedUpdateScene, statements: Iterable[ast.stmt]):
-        run_space = RoundedRectangle(color=RED, corner_radius=0.1, width=10, height=3)
-        memory_space = RoundedRectangle(color=BLUE, corner_radius=0.1, width=10, height=3)
-        spaces = VGroup(run_space, memory_space).arrange(DOWN)
-        scene.add_updater(lambda: spaces.arrange(DOWN), -2)
-        scene.add(self._scope_rect, spaces)
+    @property
+    def mob(self) -> Mobject:
+        return VGroup(self._spaces, self._scope_rect)
+
+    def play(self, statements: Iterable[ast.stmt]):
+        self._scene.add(self._scope_rect, self._spaces)
 
         for stmt in statements:
             match stmt:
                 case ast.Assign() as assign:
-                    scene.add_updater(
+                    self._scene.add_updater(
                         lambda: self._scope_rect.become(
                             SurroundingRectangle(
-                                spaces, color=ORANGE if self.name == "global" else WHITE, corner_radius=0.1)), -3)
-                    scene.update_mobjects(0.1)
-                    scene.start_tracking(self._scope_rect, 0.05)
-                    self._assign_draw(scene, assign, run_space, memory_space)
-                    scene.start_tracking(self._scope_rect, 0.05)
+                                self._spaces, color=ORANGE if self.name == "global" else WHITE, corner_radius=0.1)), -3)
+                    self._scene.update_mobjects(0.1)
+                    self._scene.start_tracking(self._scope_rect, 0.05)
+                    self._assign_draw(assign)
+                    self._scene.start_tracking(self._scope_rect, 0.05)
                 case _:
                     raise ValueError(f"対応しない書式")
 
-    @staticmethod
-    def _assign_draw(scene: OrderedUpdateScene, assign: ast.Assign,
-                     run_space: Rectangle, memory_space: Rectangle):
+    def _assign_draw(self, assign: ast.Assign,):
         target: Mobject
         match assign.targets[0]:
             case ast.Name() as target_ast:
@@ -68,18 +74,18 @@ class Scope:
                 raise ValueError(f"変数以外への代入(type: {type(assign.targets[0])})")
 
         eq = Text("=", font=FONT, font_size=MID_SIZE)
-        value_e: Expression = to_expr(assign.value, scene, 1)
+        value_e: Expression = to_expr(assign.value, self._scene, 1)
         value = value_e.mob
         assign_g = VGroup(target, eq, value)
-        scene.add_updater(lambda: assign_g.move_to(run_space), -1)
-        scene.add_updater(lambda: assign_g.arrange(RIGHT, buff=MID_BUFF), 0)
+        self._scene.add_updater(lambda: assign_g.move_to(self._run_space), -1)
+        self._scene.add_updater(lambda: assign_g.arrange(RIGHT, buff=MID_BUFF), 0)
 
-        scene.start_tracking(run_space, 0.1)
-        scene.play(Write(assign_g))
-        scene.update_mobjects(0.1)
+        self._scene.start_tracking(self._run_space, 0.1)
+        self._scene.play(Write(assign_g))
+        self._scene.update_mobjects(0.1)
 
-        value_e.play(scene)
-        scene.clear_updaters()
+        value_e.play(self._scene)
+        self._scene.clear_updaters()
 
     def invoke_val(self, val_id: str, invoke_type: InvokeType = InvokeType.Normal) -> Any:
         pass
