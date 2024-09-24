@@ -1,4 +1,3 @@
-from manim import *
 import ast
 
 from ordered_update_scene import OrderedUpdateScene

@@ -36,8 +36,8 @@ class BinOp(Expression):
 
         left: Mobject
         right: Mobject
-        self._enables_paren: tuple[bool] = (type(self._left_e) is not Constant,
-                                            type(self._right_e) is not Constant)
+        self._enables_paren: tuple[bool, bool] = (type(self._left_e) is not Constant,
+                                                  type(self._right_e) is not Constant)
         if self._enables_paren[0]:
             c = self._left_e.mob
             l = Text("(", font=FONT, font_size=MID_SIZE).next_to(c, LEFT)
@@ -120,11 +120,6 @@ class BinOp(Expression):
             right.become(right[1].copy())
 
         scene.remove_updater(self.f)
-        # scene.play(
-        #     left.animate(rate_func=rush_into).move_to(op.get_left()),
-        #     right.animate(rate_func=rush_into).move_to(op.get_right()),
-        #     run_time=0.5
-        # )
         scene.play(Transform(self._mob, op, rate_func=rush_into), run_time=0.5)
         const = Constant(ast.Constant(self.raw_value))
         const.mob.move_to(self._mob.get_center())

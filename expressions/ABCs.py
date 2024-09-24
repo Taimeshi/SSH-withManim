@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Self
-from manim import Mobject, MovingCameraScene
+from manim import Mobject
 
 from ordered_update_scene import OrderedUpdateScene
 

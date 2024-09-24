@@ -32,17 +32,27 @@ class Scope:
     def __init__(self, scene: OrderedUpdateScene, name: str = "global", parent: Self = None):
         self.name = name
         self._parent: Scope | None = parent
+        self.depth: int = self._parent.depth + 1 if self._parent else -99999
         self._scene: OrderedUpdateScene = scene
-        self._names: set[VariableName] = set()
-        self._vals: list[VariableValue] = set()
+        self._names: list[VariableName] = []
+        self._vals: list[VariableValue] = []
         self._run_space: VMobject = RoundedRectangle(color=RED, corner_radius=0.1, width=10, height=3)
         self._memory_space: VMobject = RoundedRectangle(color=BLUE, corner_radius=0.1, width=10, height=3)
-        self._children: VMobject = VMobject()
+        self._children: list[Self] = []
         self._spaces: VMobject = VGroup(self._run_space, self._memory_space).arrange(DOWN)
-        self._scene.add_updater(lambda: self._spaces.arrange(DOWN), -2)
+
         self._scope_rect: VMobject = SurroundingRectangle(self._spaces,
                                                           color=ORANGE if self.name == "global" else WHITE,
                                                           corner_radius=0.1)
+        self._scope_title: VMobject = Text(self.name, color=ORANGE if self.name == "global" else WHITE)
+
+        self._scene.add_updater(lambda: self._spaces.arrange(DOWN), 3 * self.depth)
+        self._scene.add_updater(
+            lambda: self._scope_rect.become(
+                SurroundingRectangle(
+                    self._spaces, color=ORANGE if self.name == "global" else WHITE, corner_radius=0.1)),
+            3 * self.depth + 1)
+        self._scene.add_updater(lambda: self._scope_title.align_to(self._scope_rect, UL), 3 * self.depth + 2)
 
     @property
     def mob(self) -> Mobject:
@@ -54,10 +64,7 @@ class Scope:
         for stmt in statements:
             match stmt:
                 case ast.Assign() as assign:
-                    self._scene.add_updater(
-                        lambda: self._scope_rect.become(
-                            SurroundingRectangle(
-                                self._spaces, color=ORANGE if self.name == "global" else WHITE, corner_radius=0.1)), -3)
+
                     self._scene.update_mobjects(0.1)
                     self._scene.start_tracking(self._scope_rect, 0.05)
                     self._assign_draw(assign)
@@ -86,6 +93,12 @@ class Scope:
 
         value_e.play(self._scene)
         self._scene.clear_updaters()
+
+    def add_new_scope(self, title: str, statements: Iterable[ast.stmt]) -> Self:
+        new_scope = Scope(self._scene, title, self)
+        self._children.append(new_scope)
+        new_scope.play(statements)
+        return new_scope
 
     def invoke_val(self, val_id: str, invoke_type: InvokeType = InvokeType.Normal) -> Any:
         pass

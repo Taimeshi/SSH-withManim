@@ -28,7 +28,7 @@ class OrderedUpdateScene(MovingCameraScene):
         self._updaters.add(Updater(func=func, priority=priority))
 
     @override
-    def remove_updater(self, func: Callable[[], None]) -> None:
+    def remove_updater(self, func: Callable[[], Any]) -> None:
         for u in self._updaters:
             if u.func == func:
                 self._updaters.remove(u)
