@@ -18,6 +18,7 @@ class OrderedUpdateScene(MovingCameraScene):
 
     def update(self):
         updaters_sorted = sorted(self._updaters, key=lambda ud: ud.priority, reverse=True)
+        # [..., 99, ..., 0, ..., -99, ...]
         for u in updaters_sorted:
             u.func()
         if self._enables_track:

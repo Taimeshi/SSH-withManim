@@ -36,30 +36,37 @@ class Scope:
         self._scene: OrderedUpdateScene = scene
         self._names: list[VariableName] = []
         self._vals: list[VariableValue] = []
-        self._run_space: VMobject = RoundedRectangle(color=RED, corner_radius=0.1, width=10, height=3)
-        self._memory_space: VMobject = RoundedRectangle(color=BLUE, corner_radius=0.1, width=10, height=3)
+        # self._run_space: VMobject = RoundedRectangle(color=RED, corner_radius=0.1, width=10, height=0.001)
+        # self._memory_space: VMobject = RoundedRectangle(color=BLUE, corner_radius=0.1, width=10, height=0.001)
+        self._run_space: VMobject = Rectangle(color=RED, width=10, height=0.001)
+        self._memory_space: VMobject = Rectangle(color=BLUE, width=10, height=0.001)
         self._children: list[Self] = []
         self._spaces: VMobject = VGroup(self._run_space, self._memory_space).arrange(DOWN)
 
         self._scope_rect: VMobject = SurroundingRectangle(self._spaces,
                                                           color=ORANGE if self.name == "global" else WHITE,
                                                           corner_radius=0.1)
-        self._scope_title: VMobject = Text(self.name, color=ORANGE if self.name == "global" else WHITE)
+        self._scope_title: VMobject = Text(self.name, color=ORANGE if self.name == "global" else WHITE,
+                                           font=FONT, font_size=SMALL_SIZE)
 
-        self._scene.add_updater(lambda: self._spaces.arrange(DOWN), 3 * self.depth)
         self._scene.add_updater(
-            lambda: self._scope_rect.become(
-                SurroundingRectangle(
-                    self._spaces, color=ORANGE if self.name == "global" else WHITE, corner_radius=0.1)),
-            3 * self.depth + 1)
-        self._scene.add_updater(lambda: self._scope_title.align_to(self._scope_rect, UL), 3 * self.depth + 2)
+            lambda: (self._spaces.arrange(DOWN),
+                     self._scope_rect.become(
+                         SurroundingRectangle(
+                             self._spaces, color=ORANGE if self.name == "global" else WHITE, corner_radius=0.1)),
+                     self._scope_title.align_to(self._scope_rect, UL).shift(UP * 0.35)), self.depth-99999)
 
     @property
     def mob(self) -> Mobject:
         return VGroup(self._spaces, self._scope_rect)
 
     def play(self, statements: Iterable[ast.stmt]):
-        self._scene.add(self._scope_rect, self._spaces)
+        self._scene.add(self._scope_rect, self._spaces, self._scope_title)
+
+        self._scene.play(self._run_space.animate.stretch_to_fit_height(3, about_edge=DOWN),
+                         run_time=1)
+        self._scene.play(self._memory_space.animate.stretch_to_fit_height(3, about_edge=DOWN),
+                         run_time=1)
 
         for stmt in statements:
             match stmt:
@@ -72,7 +79,7 @@ class Scope:
                 case _:
                     raise ValueError(f"対応しない書式")
 
-    def _assign_draw(self, assign: ast.Assign,):
+    def _assign_draw(self, assign: ast.Assign, ):
         target: Mobject
         match assign.targets[0]:
             case ast.Name() as target_ast:
