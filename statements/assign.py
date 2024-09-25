@@ -39,4 +39,3 @@ class Assign(Statement):
         if scope.depth == 0:
             scope.expand_new_scope("new scope", [self._assign])
         scene.restore_updaters()
-
