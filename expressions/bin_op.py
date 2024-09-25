@@ -1,7 +1,7 @@
 from manim import *
 import ast
 
-from expressions.ABCs import Expression
+from expressions.expression import Expression
 from expressions.constant import Constant
 from expressions.to_expr import to_expr
 from ordered_update_scene import OrderedUpdateScene
