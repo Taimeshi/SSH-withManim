@@ -59,9 +59,9 @@ class BinOp(Expression):
         else:
             right = self._right_e.mob
 
-        self._mob = VGroup(left, op, right)
         left.next_to(op, LEFT)
         right.next_to(op, RIGHT)
+        self._mob = VGroup(left, op, right)
 
         self.f = lambda: self._mob.arrange(RIGHT, buff=MID_BUFF)
         self._scene.add_updater(self.f, depth)

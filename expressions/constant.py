@@ -12,7 +12,7 @@ class Constant(Expression):
         super().__init__(depth)
         self._value: Any = constant.value
         self._mob: Mobject = Text(repr(self._value),
-                                  font=FONT, font_size=MID_SIZE, color=get_type_color(self.raw_value))
+                                  font=FONT, font_size=MID_SIZE, color=get_type_color(self._value))
 
     @property
     def mob(self) -> Mobject:

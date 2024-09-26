@@ -16,9 +16,10 @@ class OrderedUpdateScene(MovingCameraScene):
         self._tracking_margin: float = .1
         self._enables_track: bool = False
         self._updaters_backup: set[Updater] = set()
+        self._to_track_backup: Mobject | None = None
 
     def update(self):
-        updaters_sorted = sorted(self._updaters, key=lambda ud: ud.depth, reverse=True)
+        updaters_sorted = sorted(self._updaters, key=lambda ud: ud.priority, reverse=True)
         # [..., 99, ..., 0, ..., -99, ...]
         for u in updaters_sorted:
             u.func()
@@ -56,11 +57,13 @@ class OrderedUpdateScene(MovingCameraScene):
         self._to_track = mobject_to_track
         self._enables_track = True
 
-    def save_updaters(self):
+    def save_state(self):
         self._updaters_backup = self._updaters
+        self._to_track_backup = self._to_track
 
-    def restore_updaters(self):
+    def restore_state(self):
         self._updaters = self._updaters_backup
+        self.start_tracking(self._to_track_backup)
 
 
 @dataclass(frozen=True)

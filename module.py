@@ -14,5 +14,6 @@ class Module:
     def play(self, scene: OrderedUpdateScene) -> None:
         global_scope = Scope(scene, self._file_name)
         scene.add(global_scope.mob)
-        block = Block(self._statements)
-        global_scope.play(self._statements)
+        block = Block(self._statements, global_scope)
+        global_scope.play()
+        block.play(scene)

@@ -19,4 +19,4 @@ class CalcScene(OrderedUpdateScene):
         self.add(global_scope.mob)
         block = Block(statements, global_scope)
         global_scope.play()
-        block.play()
+        block.play(self)

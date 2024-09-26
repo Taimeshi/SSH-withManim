@@ -14,8 +14,7 @@ class Block:
 
     def play(self, scene: OrderedUpdateScene):
         for stmt_ast in self._statements:
-            stmt = to_stmt(stmt_ast, self._scene)
-            self._scene.add(stmt.mob)
-            stmt.play(self)
-            self._scene.remove(stmt.mob)
-            self._scene.start_tracking(VGroup(self._scope_rect, self._scope_title), 0.05)
+            stmt = to_stmt(stmt_ast, scene)
+            scene.save_state()
+            stmt.play(self._scope)
+            scene.restore_state()
