@@ -1,19 +1,12 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Self
+from typing import Any
 from manim import Mobject
-
-from ordered_update_scene import OrderedUpdateScene
 
 
 class Expression(metaclass=ABCMeta):
 
-    def __init__(self, priority: float):
-        self.priority = priority
-
-    @property
-    @abstractmethod
-    def raw_value(self) -> Any:
-        pass
+    def __init__(self, depth: int):
+        self.depth: int = depth
 
     @property
     @abstractmethod
@@ -21,5 +14,5 @@ class Expression(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def play(self, scene: OrderedUpdateScene) -> Self:
+    def play(self) -> Any:
         pass

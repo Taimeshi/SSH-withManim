@@ -1,17 +1,16 @@
 from abc import ABCMeta, abstractmethod
 from manim import VMobject
 
-from ordered_update_scene import OrderedUpdateScene
 from scope import Scope
 
 
 class Statement(metaclass=ABCMeta):
 
-    def __init__(self, priority: int = 0):
-        self.priority = priority
+    def __init__(self, depth: int = 0):
+        self.depth = depth
 
     @abstractmethod
-    def play(self, scene: OrderedUpdateScene, scope: Scope) -> None:
+    def play(self, scope: Scope) -> None:
         pass
 
     @property

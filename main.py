@@ -3,7 +3,7 @@ from calc_scene import CalcScene
 
 def main():
     code = "val1=1+1"
-    scene = CalcScene(code)
+    scene = CalcScene(code, "test.py")
     scene.render()
 
 

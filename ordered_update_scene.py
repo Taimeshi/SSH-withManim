@@ -18,7 +18,7 @@ class OrderedUpdateScene(MovingCameraScene):
         self._updaters_backup: set[Updater] = set()
 
     def update(self):
-        updaters_sorted = sorted(self._updaters, key=lambda ud: ud.priority, reverse=True)
+        updaters_sorted = sorted(self._updaters, key=lambda ud: ud.depth, reverse=True)
         # [..., 99, ..., 0, ..., -99, ...]
         for u in updaters_sorted:
             u.func()
