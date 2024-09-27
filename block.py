@@ -15,6 +15,6 @@ class Block:
     def play(self, scene: OrderedUpdateScene):
         for stmt_ast in self._statements:
             stmt = to_stmt(stmt_ast, scene)
-            scene.save_state()
+            state = scene.save_state()
             stmt.play(self._scope)
-            scene.restore_state()
+            scene.restore_state(state)

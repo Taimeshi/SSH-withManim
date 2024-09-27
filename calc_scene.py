@@ -1,5 +1,4 @@
 from block import Block
-from module import Module
 import ast
 
 from ordered_update_scene import OrderedUpdateScene

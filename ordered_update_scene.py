@@ -4,6 +4,18 @@ from typing import override, Callable, Any
 from manim import *
 
 
+@dataclass(frozen=True)
+class Updater:
+    func: Callable[[], Any]
+    priority: float
+
+
+@dataclass(frozen=True)
+class SceneState:
+    updaters: set[Updater]
+    to_track: Mobject | None
+
+
 class OrderedUpdateScene(MovingCameraScene):
 
     def __init__(self, **kwargs):
@@ -15,8 +27,6 @@ class OrderedUpdateScene(MovingCameraScene):
         self._to_track: Mobject | None = None
         self._tracking_margin: float = .1
         self._enables_track: bool = False
-        self._updaters_backup: set[Updater] = set()
-        self._to_track_backup: Mobject | None = None
 
     def update(self):
         updaters_sorted = sorted(self._updaters, key=lambda ud: ud.priority, reverse=True)
@@ -58,15 +68,9 @@ class OrderedUpdateScene(MovingCameraScene):
         self._enables_track = True
 
     def save_state(self):
-        self._updaters_backup = self._updaters
-        self._to_track_backup = self._to_track
+        return SceneState(self._updaters, self._to_track)
 
-    def restore_state(self):
-        self._updaters = self._updaters_backup
-        self.start_tracking(self._to_track_backup)
-
-
-@dataclass(frozen=True)
-class Updater:
-    func: Callable[[], Any]
-    priority: float
+    def restore_state(self, scene_state: SceneState):
+        self._updaters = scene_state.updaters
+        if scene_state.to_track is not None:
+            self.start_tracking(scene_state.to_track)

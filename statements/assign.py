@@ -28,9 +28,21 @@ class Assign(Statement):
         return VGroup(self.target, self.eq, self.value_e.mob)
 
     def play(self, scope: Scope):
+        self.mob.move_to(scope.run_space)
         self._scene.add_updater(lambda: self.mob.move_to(scope.run_space), self.depth)
         self._scene.add_updater(lambda: self.mob.arrange(RIGHT, buff=MID_BUFF), self.depth)
         self._scene.start_tracking(scope.run_space, 0.1)
-        self._scene.play(Write(self.mob))
         self._scene.update_mobjects(0.1)
+        self._scene.play(Write(self.mob))
         self.value_e.play()
+
+        if scope.is_global:  # tmp
+            from block import Block
+
+            state = self._scene.save_state()
+            new_space = scope.expand_new_scope("tmp")
+            new_block = Block([self._assign], new_space)
+            self._scene.update_mobjects(0.1)
+            new_space.play()
+            new_block.play(self._scene)
+            self._scene.restore_state(state)
