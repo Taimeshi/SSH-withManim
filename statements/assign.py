@@ -41,6 +41,7 @@ class Assign(Statement):
 
             state = self._scene.save_state()
             new_space = scope.expand_new_scope("tmp")
+            self._scene.start_tracking(scope.mob, 0.1)
             new_block = Block([self._assign], new_space)
             self._scene.update_mobjects(0.1)
             new_space.play()

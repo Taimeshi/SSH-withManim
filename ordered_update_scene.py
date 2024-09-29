@@ -53,17 +53,27 @@ class OrderedUpdateScene(MovingCameraScene):
         self._updaters: set[Updater] = set()
 
     def _track(self):
-        self.camera.frame.set_width(self._to_track.get_width() * (1 + self._tracking_margin))
+        if self._to_track.get_width() / self._to_track.get_height() >= 3 / 2:
+            self.camera.frame.set_width(self._to_track.get_width() * (1 + self._tracking_margin))
+        else:
+            self.camera.frame.set_height(self._to_track.get_height() * (1 + self._tracking_margin))
         self.camera.frame.move_to(self._to_track)
 
     def start_tracking(self, mobject_to_track: Mobject, margin: float = None, run_time: float = 1):
         self._tracking_margin = margin if margin else self._tracking_margin
         self._enables_track = False
-        self.play(
-            self.camera.frame.animate.move_to(mobject_to_track)
-            .set_width(mobject_to_track.get_width() * (1 + self._tracking_margin)),
-            run_time=run_time
-        )
+        if mobject_to_track.get_width() / mobject_to_track.get_height() >= 3 / 2:
+            self.play(
+                self.camera.frame.animate.move_to(mobject_to_track)
+                .set_width(mobject_to_track.get_width() * (1 + self._tracking_margin)),
+                run_time=run_time
+            )
+        else:
+            self.play(
+                self.camera.frame.animate.move_to(mobject_to_track)
+                .set_height(mobject_to_track.get_height() * (1 + self._tracking_margin)),
+                run_time=run_time
+            )
         self._to_track = mobject_to_track
         self._enables_track = True
 

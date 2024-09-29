@@ -34,14 +34,15 @@ class Scope:
         self._scope_title: VMobject = Text(self.name, color=r_color, font=FONT, font_size=SMALL_SIZE)
 
         self._scene.add_updater(
-            lambda: (self._spaces.arrange(DOWN),
-                     VGroup(*[s.mob for s in self._scope_children]).arrange(DOWN),
-                     VGroup(*[s.mob for s in self._scope_children]).next_to(self._spaces, DOWN),
-                     self._scope_rect.become(
-                         SurroundingRectangle(VGroup(self.run_space, self.memory_space,
-                                                     *[s.mob for s in self._scope_children]),
-                                              color=r_color, corner_radius=0.1)),
-                     self._scope_title.align_to(self._scope_rect, UL).shift(UP * 0.35)), self.depth - 99999)
+            f := lambda: (self._spaces.arrange(DOWN),
+                          VGroup(*[s.mob for s in self._scope_children]).arrange(DOWN),
+                          VGroup(*[s.mob for s in self._scope_children]).next_to(self._spaces, DOWN),
+                          self._scope_rect.become(
+                              SurroundingRectangle(VGroup(self.run_space, self.memory_space,
+                                                          *[s.mob for s in self._scope_children]),
+                                                   color=r_color, corner_radius=0.1)),
+                          self._scope_title.align_to(self._scope_rect, UL).shift(UP * 0.35)), self.depth - 99999)
+        self.f = f
         self._scene.update_mobjects(0.1)
 
     @property
@@ -58,6 +59,15 @@ class Scope:
 
     def expand_new_scope(self, title: str) -> Self:
         new_scope = Scope(self._scene, title, self)
+        self._scene.remove_updater(self.f)
+        r_color = ORANGE if self.is_global else WHITE
+        self._scene.play(
+            Transform(self._scope_rect,
+                      SurroundingRectangle(VGroup(self.run_space, self.memory_space,
+                                                  *[s.mob for s in self._scope_children], new_scope.mob),
+                                           color=r_color, corner_radius=0.1))
+        )
+        self._scene.add_updater(self.f, self.depth - 99999)
         self._scope_children.append(new_scope)
         self._scene.add(new_scope.mob)
         return new_scope
