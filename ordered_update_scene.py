@@ -30,7 +30,6 @@ class OrderedUpdateScene(MovingCameraScene):
 
     def update(self):
         updaters_sorted = sorted(self._updaters, key=lambda ud: ud.priority, reverse=True)
-        # [..., 99, ..., 0, ..., -99, ...]
         for u in updaters_sorted:
             u.func()
         if self._enables_track:
@@ -64,14 +63,14 @@ class OrderedUpdateScene(MovingCameraScene):
         self._enables_track = False
         if mobject_to_track.get_width() / mobject_to_track.get_height() >= 3 / 2:
             self.play(
-                self.camera.frame.animate.move_to(mobject_to_track)
-                .set_width(mobject_to_track.get_width() * (1 + self._tracking_margin)),
+                self.camera.frame.animate
+                .set_width(mobject_to_track.get_width() * (1 + self._tracking_margin)).move_to(mobject_to_track),
                 run_time=run_time
             )
         else:
             self.play(
-                self.camera.frame.animate.move_to(mobject_to_track)
-                .set_height(mobject_to_track.get_height() * (1 + self._tracking_margin)),
+                self.camera.frame.animate
+                .set_height(mobject_to_track.get_height() * (1 + self._tracking_margin)).move_to(mobject_to_track),
                 run_time=run_time
             )
         self._to_track = mobject_to_track

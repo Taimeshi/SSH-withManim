@@ -35,8 +35,8 @@ class Scope:
 
         self._scene.add_updater(
             f := lambda: (self._spaces.arrange(DOWN),
-                          VGroup(*[s.mob for s in self._scope_children]).arrange(DOWN),
-                          VGroup(*[s.mob for s in self._scope_children]).next_to(self._spaces, DOWN),
+                          VGroup(*[s.mob for s in self._scope_children]).arrange(DOWN)
+                          .next_to(self._spaces, DOWN),
                           self._scope_rect.become(
                               SurroundingRectangle(VGroup(self.run_space, self.memory_space,
                                                           *[s.mob for s in self._scope_children]),
@@ -54,7 +54,7 @@ class Scope:
         self._scene.start_tracking(VGroup(self._scope_rect, self._scope_title), 0.05)
         self._scene.play(self.run_space.animate.stretch_to_fit_height(3, about_edge=DOWN),
                          run_time=1)
-        self._scene.play(self.memory_space.animate.stretch_to_fit_height(3, about_edge=DOWN),
+        self._scene.play(self.memory_space.animate.stretch_to_fit_height(2, about_edge=DOWN),
                          run_time=1)
 
     def expand_new_scope(self, title: str) -> Self:
