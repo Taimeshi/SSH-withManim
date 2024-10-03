@@ -42,7 +42,7 @@ class VariableRect(VMobject):
 
         self.points = np.array(list(map(lambda x: [x[0] - of, *x[1:]], points)))
         text.move_to(np.array([-w - of, 0, 0]), LEFT)
-        self._jointing_dot = Dot(np.array([s - of, 0, 0]), stroke_width=self.stroke_width)
+        self._jointing_dot = Dot(np.array([s - of, 0, 0]), radius=DEFAULT_DOT_RADIUS * size)
         self._jointing_dot.set_opacity(0)
         self.add(text, self._jointing_dot)
         self._arrow: Mobject | None = None
