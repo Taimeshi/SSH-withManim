@@ -3,6 +3,8 @@ from typing import override, Callable, Any
 
 from manim import *
 
+from updater import UpdatersSection
+
 
 @dataclass(frozen=True)
 class Updater:
@@ -22,34 +24,30 @@ class OrderedUpdateScene(MovingCameraScene):
         self._updaters: set[Updater] = set()
         super().__init__(**kwargs)
         updater_mob = Mobject()
-        updater_mob.add_updater(lambda _: self.update())
+        cam_updater_sec = UpdatersSection()
+        updater_mob.add_updater(lambda _: cam_updater_sec.update())
+        cam_updater_sec.add_updater(lambda _: self._track())
+        self.origin_upd_sec = cam_updater_sec.branch()
         self.add(updater_mob)
         self._to_track: Mobject | None = None
         self._tracking_margin: float = .1
         self._enables_track: bool = False
 
-    def update(self):
-        updaters_sorted = sorted(self._updaters, key=lambda ud: ud.priority, reverse=True)
-        for u in updaters_sorted:
-            u.func()
-        if self._enables_track:
-            self._track()
-
-    @override
-    def add_updater(self, func: Callable[[], Any], priority: float = 0) -> None:
-        self._updaters.add(Updater(func=func, priority=priority))
-
-    @override
-    def remove_updater(self, func: Callable[[], Any]) -> None:
-        for u in self._updaters:
-            if u.func == func:
-                self._updaters.remove(u)
-                return
-        else:
-            raise ValueError("Given function isn't registered")
-
-    def clear_updaters(self):
-        self._updaters: set[Updater] = set()
+    # @override
+    # def add_updater(self, func: Callable[[], Any], priority: float = 0) -> None:
+    #     self._updaters.add(Updater(func=func, priority=priority))
+    #
+    # @override
+    # def remove_updater(self, func: Callable[[], Any]) -> None:
+    #     for u in self._updaters:
+    #         if u.func == func:
+    #             self._updaters.remove(u)
+    #             return
+    #     else:
+    #         raise ValueError("Given function isn't registered")
+    #
+    # def clear_updaters(self):
+    #     self._updaters: set[Updater] = set()
 
     def _track(self):
         if self._to_track.get_width() / self._to_track.get_height() >= 3 / 2:
